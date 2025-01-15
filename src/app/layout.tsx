@@ -16,9 +16,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={`${inter.className} flex min-h-screen`}>
+
         <Navbar />
-        {children}
+
+        {/* Main Content Area */}
+        <main className="flex-1 p-6 bg-gray-50 lg:ml-64 overflow-y-autoauto">
+          {children}
+        </main>
       </body>
     </html>
   );

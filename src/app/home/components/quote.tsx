@@ -31,6 +31,10 @@ const Quote = () => {
         
         setQuote(quoteText);
         setAuthor(authorName);
+
+        // Store quote in localStorage
+        localStorage.setItem('quote', quoteText);
+        localStorage.setItem('author', authorName);
       } else {
         throw new Error(`Error: ${response.status} ${response.statusText}`);
       }
@@ -44,7 +48,15 @@ const Quote = () => {
 
   // Fetch quote on initial render
   useEffect(() => {
-    fetchQuote();
+    const savedQuote = localStorage.getItem('quote');
+    const savedAuthor = localStorage.getItem('author');
+
+    if (savedQuote && savedAuthor) {
+      setQuote(savedQuote);
+      setAuthor(savedAuthor);
+    } else {
+      fetchQuote(); // Fetch if there's no saved quote
+    }
   }, []);
 
   return (
