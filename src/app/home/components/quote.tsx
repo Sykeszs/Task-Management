@@ -56,7 +56,7 @@ const Quote = () => {
         <p style={{ color: 'red' }}>{error}</p>
       ) : (
         <div>
-          <p style={{ fontStyle: 'italic', fontSize: '1.5em' }}>"{quote}"</p>
+          <p style={{ fontStyle: 'italic', fontSize: '1.5em' }}>&quot;{quote}&quot;</p>
           <p style={{ textAlign: 'right', fontWeight: 'bold' }}>- {author}</p>
         </div>
       )}
