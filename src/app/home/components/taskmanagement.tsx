@@ -9,20 +9,21 @@ import {
   onSnapshot,
   updateDoc,
   serverTimestamp,
+  Timestamp,
 } from "firebase/firestore";
 
 interface Task {
   id: string;
   name: string;
-  createdAt: any;
-  updatedAt: any;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
   done: boolean;
 }
 
 export default function TaskManagementPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [taskName, setTaskName] = useState("");
-  const [isEditing, setIsEditing] = useState<string | null>(null); // Track which task is being edited
+  const [isEditing, setIsEditing] = useState<string | null>(null);
   const [editedTaskName, setEditedTaskName] = useState("");
 
   useEffect(() => {
@@ -30,11 +31,10 @@ export default function TaskManagementPage() {
       const taskData = snapshot.docs.map((doc) => ({
         id: doc.id,
         name: doc.data().name,
-        createdAt: doc.data().createdAt,
-        updatedAt: doc.data().updatedAt,
+        createdAt: doc.data().createdAt as Timestamp,
+        updatedAt: doc.data().updatedAt as Timestamp,
         done: doc.data().done,
       }));
-      // Filter out tasks that are marked as 'done' from the UI
       setTasks(taskData.filter((task) => !task.done));
     });
     return () => unsubscribe();
@@ -70,8 +70,8 @@ export default function TaskManagementPage() {
       name: editedTaskName,
       updatedAt: serverTimestamp(),
     });
-    setIsEditing(null); // Exit editing mode
-    setEditedTaskName(""); // Clear the input field
+    setIsEditing(null);
+    setEditedTaskName("");
   };
 
   return (
@@ -112,9 +112,9 @@ export default function TaskManagementPage() {
                   </span>
                 )}
                 <div className="text-sm text-gray-500">
-                  <span>Created: {task.createdAt?.toDate()?.toLocaleString()}</span>
+                  <span>Created: {task.createdAt?.toDate().toLocaleString()}</span>
                   <br />
-                  <span>Updated: {task.updatedAt?.toDate()?.toLocaleString()}</span>
+                  <span>Updated: {task.updatedAt?.toDate().toLocaleString()}</span>
                 </div>
               </div>
               <div className="flex space-x-2">
@@ -143,7 +143,7 @@ export default function TaskManagementPage() {
                   <button
                     onClick={() => {
                       setIsEditing(task.id);
-                      setEditedTaskName(task.name); // Load the current task name for editing
+                      setEditedTaskName(task.name);
                     }}
                     className="bg-yellow-500 text-white p-2 rounded"
                   >
