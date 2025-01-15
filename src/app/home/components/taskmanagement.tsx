@@ -1,33 +1,84 @@
 "use client";
-import { useState } from 'react';
+import { useEffect, useState } from "react";
+import { db } from "@/app/firebaseConfig";
+import {
+  collection,
+  addDoc,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  updateDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 
 interface Task {
-  id: number;
+  id: string;
   name: string;
+  createdAt: any;
+  updatedAt: any;
+  done: boolean;
 }
 
 export default function TaskManagementPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [taskName, setTaskName] = useState('');
+  const [taskName, setTaskName] = useState("");
+  const [isEditing, setIsEditing] = useState<string | null>(null); // Track which task is being edited
+  const [editedTaskName, setEditedTaskName] = useState("");
 
-  const addTask = () => {
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, "tasks"), (snapshot) => {
+      const taskData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        name: doc.data().name,
+        createdAt: doc.data().createdAt,
+        updatedAt: doc.data().updatedAt,
+        done: doc.data().done,
+      }));
+      // Filter out tasks that are marked as 'done' from the UI
+      setTasks(taskData.filter((task) => !task.done));
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const addTask = async () => {
     if (taskName.trim()) {
-      const newTask: Task = {
-        id: Date.now(),
+      await addDoc(collection(db, "tasks"), {
         name: taskName,
-      };
-      setTasks([...tasks, newTask]);
-      setTaskName('');
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        done: false,
+      });
+      setTaskName("");
     }
   };
 
-  const deleteTask = (taskId: number) => {
-    setTasks(tasks.filter(task => task.id !== taskId));
+  const deleteTask = async (taskId: string) => {
+    await deleteDoc(doc(db, "tasks", taskId));
+  };
+
+  const markAsDone = async (taskId: string, done: boolean) => {
+    const taskRef = doc(db, "tasks", taskId);
+    await updateDoc(taskRef, {
+      done: !done,
+      updatedAt: serverTimestamp(),
+    });
+  };
+
+  const editTask = async (taskId: string) => {
+    const taskRef = doc(db, "tasks", taskId);
+    await updateDoc(taskRef, {
+      name: editedTaskName,
+      updatedAt: serverTimestamp(),
+    });
+    setIsEditing(null); // Exit editing mode
+    setEditedTaskName(""); // Clear the input field
   };
 
   return (
     <div className="min-h-screen p-4 bg-gray-100">
-      <h1 className="text-2xl font-bold text-center text-green-600 mb-6">Task Management</h1>
+      <h1 className="text-2xl font-bold text-center text-green-600 mb-6">
+        Task Management
+      </h1>
       <div className="max-w-md mx-auto">
         <div className="flex mb-4">
           <input
@@ -47,13 +98,59 @@ export default function TaskManagementPage() {
         <ul className="bg-white rounded-md shadow-md divide-y divide-gray-200">
           {tasks.map((task) => (
             <li key={task.id} className="p-4 flex justify-between items-center">
-              <span>{task.name}</span>
-              <button
-                onClick={() => deleteTask(task.id)}
-                className="text-red-500 hover:text-red-700"
-              >
-                Delete
-              </button>
+              <div>
+                {isEditing === task.id ? (
+                  <input
+                    type="text"
+                    value={editedTaskName}
+                    onChange={(e) => setEditedTaskName(e.target.value)}
+                    className="p-2 border rounded"
+                  />
+                ) : (
+                  <span className={task.done ? "line-through text-gray-500" : ""}>
+                    {task.name}
+                  </span>
+                )}
+                <div className="text-sm text-gray-500">
+                  <span>Created: {task.createdAt?.toDate()?.toLocaleString()}</span>
+                  <br />
+                  <span>Updated: {task.updatedAt?.toDate()?.toLocaleString()}</span>
+                </div>
+              </div>
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => markAsDone(task.id, task.done)}
+                  className={`${
+                    task.done ? "bg-gray-300" : "bg-green-500"
+                  } p-2 text-white rounded hover:bg-green-600`}
+                >
+                  {task.done ? "Undo" : "Done"}
+                </button>
+                <button
+                  onClick={() => deleteTask(task.id)}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  Delete
+                </button>
+                {isEditing === task.id ? (
+                  <button
+                    onClick={() => editTask(task.id)}
+                    className="bg-blue-500 text-white p-2 rounded"
+                  >
+                    Save
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setIsEditing(task.id);
+                      setEditedTaskName(task.name); // Load the current task name for editing
+                    }}
+                    className="bg-yellow-500 text-white p-2 rounded"
+                  >
+                    Edit
+                  </button>
+                )}
+              </div>
             </li>
           ))}
           {tasks.length === 0 && (
