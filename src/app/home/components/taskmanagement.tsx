@@ -34,8 +34,9 @@ export default function TaskManagementPage() {
         createdAt: doc.data().createdAt as Timestamp,
         updatedAt: doc.data().updatedAt as Timestamp,
         done: doc.data().done,
+        deleted: doc.data().deleted,
       }));
-      setTasks(taskData.filter((task) => !task.done));
+      setTasks(taskData.filter((task) => !task.done && !task.deleted));
     });
     return () => unsubscribe();
   }, []);
@@ -47,14 +48,17 @@ export default function TaskManagementPage() {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
         done: false,
+        deleted: false,
       });
       setTaskName("");
     }
   };
 
   const deleteTask = async (taskId: string) => {
-    await deleteDoc(doc(db, "tasks", taskId));
+    const taskDoc = doc(db, "tasks", taskId);
+    await updateDoc(taskDoc, { deleted: true, updatedAt: serverTimestamp() });
   };
+  
 
   const markAsDone = async (taskId: string, done: boolean) => {
     const taskRef = doc(db, "tasks", taskId);

@@ -1,5 +1,6 @@
 import Calendar from "./components/calendar";
 import NotesPage from "./components/notes";
+import ProgressPage from "./components/progress";
 import Quote from "./components/quote";
 import TaskManagementPage from "./components/taskmanagement";
 
@@ -11,6 +12,7 @@ const Home = () => {
       {/* Task Management Page at the top */}
       <div className="bg-white p-6 rounded-lg shadow-lg mb-8">
         <TaskManagementPage />
+        <ProgressPage />
       </div>
 
       {/* The three components on the bottom */}
