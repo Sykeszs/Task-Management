@@ -50,11 +50,12 @@ export default function ProgressPage() {
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "tasks"), (snapshot) => {
-      const taskData = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        done: doc.data().done,
-        deleted: doc.data().deleted || false, // assuming a deleted field exists
-      }));
+        const taskData: Task[] = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            done: doc.data().done,
+            deleted: doc.data().deleted || false,
+          }));
+          
 
       // Filter out deleted tasks
       const activeTasks = taskData.filter((task) => !task.deleted);

@@ -2,12 +2,13 @@
 import { useEffect, useState } from "react";
 import { db } from "@/app/firebaseConfig";
 import { collection, onSnapshot } from "firebase/firestore";
+import { Timestamp } from "firebase/firestore";
 
 interface Task {
   id: string;
   name: string;
-  createdAt: any;
-  updatedAt: any;
+  createdAt: Timestamp | null;
+  updatedAt: Timestamp | null;
   done: boolean;
 }
 
@@ -16,13 +17,13 @@ export default function History() {
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "tasks"), (snapshot) => {
-      const taskData = snapshot.docs.map((doc) => ({
+      const taskData: Task[] = snapshot.docs.map((doc) => ({
         id: doc.id,
         name: doc.data().name,
-        createdAt: doc.data().createdAt,
-        updatedAt: doc.data().updatedAt,
+        createdAt: doc.data().createdAt instanceof Timestamp ? doc.data().createdAt : null,
+        updatedAt: doc.data().updatedAt instanceof Timestamp ? doc.data().updatedAt : null,
         done: doc.data().done,
-      }));
+      }));      
       // Filter tasks that are marked as done
       setCompletedTasks(taskData.filter((task) => task.done));
     });
@@ -41,9 +42,10 @@ export default function History() {
               <div>
                 <span className="line-through text-gray-500">{task.name}</span>
                 <div className="text-sm text-gray-500">
-                  <span>Created: {task.createdAt?.toDate()?.toLocaleString()}</span>
-                  <br />
-                  <span>Completed: {task.updatedAt?.toDate()?.toLocaleString()}</span>
+                <span>Created: {task.createdAt ? task.createdAt.toDate().toLocaleString() : "N/A"}</span>
+                <br/>
+                <span>Completed: {task.updatedAt ? task.updatedAt.toDate().toLocaleString() : "N/A"}</span>
+
                 </div>
               </div>
             </li>

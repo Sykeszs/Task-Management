@@ -1,30 +1,29 @@
 "use client";
+import { Timestamp, collection, onSnapshot, doc, deleteDoc, updateDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { db } from "@/app/firebaseConfig";
-import { collection, onSnapshot, doc, deleteDoc, updateDoc } from "firebase/firestore";
 
 interface Task {
   id: string;
   name: string;
-  createdAt: any;
-  updatedAt: any;
+  createdAt: Timestamp | null;
+  updatedAt: Timestamp | null;
   deleted: boolean;
-  deletedAt: any;
+  deletedAt: Timestamp | null;
 }
 
 export default function RecentlyDeletedPage() {
   const [deletedTasks, setDeletedTasks] = useState<Task[]>([]);
 
   useEffect(() => {
-    // Fetch deleted tasks and clean up old ones
     const unsubscribe = onSnapshot(collection(db, "tasks"), async (snapshot) => {
-      const taskData = snapshot.docs.map((doc) => ({
+      const taskData: Task[] = snapshot.docs.map((doc) => ({
         id: doc.id,
         name: doc.data().name,
-        createdAt: doc.data().createdAt,
-        updatedAt: doc.data().updatedAt,
+        createdAt: doc.data().createdAt instanceof Timestamp ? doc.data().createdAt : null,
+        updatedAt: doc.data().updatedAt instanceof Timestamp ? doc.data().updatedAt : null,
         deleted: doc.data().deleted,
-        deletedAt: doc.data().deletedAt,
+        deletedAt: doc.data().deletedAt instanceof Timestamp ? doc.data().deletedAt : null,
       }));
 
       // Filter out deleted tasks
@@ -33,11 +32,11 @@ export default function RecentlyDeletedPage() {
 
       // Auto-delete tasks older than 30 days
       const now = new Date();
-      const thirtyDaysAgo = new Date();
+      const thirtyDaysAgo = new Date(now);
       thirtyDaysAgo.setDate(now.getDate() - 30);
 
       filteredTasks.forEach(async (task) => {
-        if (task.deletedAt?.toDate() < thirtyDaysAgo) {
+        if (task.deletedAt && task.deletedAt.toDate() < thirtyDaysAgo) {
           await deleteDoc(doc(db, "tasks", task.id));
         }
       });
@@ -52,7 +51,7 @@ export default function RecentlyDeletedPage() {
 
   const restoreTask = async (taskId: string) => {
     const taskDoc = doc(db, "tasks", taskId);
-    await updateDoc(taskDoc, { deleted: false, updatedAt: new Date() });
+    await updateDoc(taskDoc, { deleted: false, updatedAt: Timestamp.now() });
   };
 
   return (
@@ -67,7 +66,9 @@ export default function RecentlyDeletedPage() {
               <div>
                 <span className="line-through text-gray-500">{task.name}</span>
                 <div className="text-sm text-gray-500">
-                  <span>Deleted At: {task.deletedAt?.toDate()?.toLocaleString()}</span>
+                  <span>
+                    Deleted At: {task.deletedAt ? task.deletedAt.toDate().toLocaleString() : "N/A"}
+                  </span>
                 </div>
               </div>
               <div className="flex space-x-2">
