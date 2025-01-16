@@ -45,7 +45,6 @@ const CircleProgress = ({ progress }: { progress: number }) => {
 };
 
 export default function ProgressPage() {
-  const [tasks, setTasks] = useState<Task[]>([]);
   const [completedTasks, setCompletedTasks] = useState<number>(0);
   const [totalTasks, setTotalTasks] = useState<number>(0);
 
@@ -59,7 +58,6 @@ export default function ProgressPage() {
 
       // Filter out deleted tasks
       const activeTasks = taskData.filter((task) => !task.deleted);
-      setTasks(activeTasks);
 
       // Calculate completed tasks
       setCompletedTasks(activeTasks.filter((task) => task.done).length);
