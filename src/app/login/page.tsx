@@ -26,23 +26,25 @@ export default function Login() {
     e.preventDefault();
     setError("");
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      await signInWithEmailAndPassword(auth, email, password);
 
       // After successful login, navigate to the home page
       router.replace("/home");
 
-    } catch (error: any) {
-      if (
-        error.code === "auth/user-not-found" || 
-        error.code === "auth/wrong-password" || 
-        error.code === "auth/invalid-credential"
-      ) {
-        setError("Invalid email or password. Please try again.");
-      } else {
-        setError("An unexpected error occurred. Please try again later.");
+    } catch (error: unknown) {
+      if (error instanceof Error && "code" in error && typeof error.code === "string") {
+        if (
+          error.code === "auth/user-not-found" || 
+          error.code === "auth/wrong-password" || 
+          error.code === "auth/invalid-credential"
+        ) {
+          setError("Invalid email or password. Please try again.");
+        } else {
+          setError("An unexpected error occurred. Please try again later.");
+        }
       }
       console.error("Login Error:", error);
-    }
+   }
   };
 
   return (

@@ -82,13 +82,13 @@ export default function Register() {
           return prev - 1;
         });
       }, 1000);
-    } catch (error: any) {
-      if (error.code === "auth/email-already-in-use") {
-        setError("This email is already registered. Please log in.");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("Registration Error:", error);
+        setError(error.message);
       } else {
         setError("An unexpected error occurred. Please try again.");
       }
-      console.error("Registration Error:", error);
     }
   };
 
@@ -107,8 +107,10 @@ export default function Register() {
       setSuccess("OTP verified successfully! Redirecting...");
       setTimeout(() => router.replace("/login"), 2000);
     } catch (error) {
+      console.error("OTP Verification Error:", error);  // ✅ Now it's used
       setError("Failed to verify OTP. Please try again.");
     }
+    
   };
 
   // 🔹 Resend OTP
@@ -138,7 +140,7 @@ export default function Register() {
           return prev - 1;
         });
       }, 1000);
-    } catch (error) {
+    } catch (_) {
       setError("Failed to resend OTP. Please try again.");
     }
   };
