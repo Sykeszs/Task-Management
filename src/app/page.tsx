@@ -1,12 +1,12 @@
-import Home from "./home/page";
+// _app.tsx
+import { AuthProvider } from "./context/AuthContext";
+import type { AppProps } from "next/app";
+import Login from "./login/page";
 
-
-const Page = () => {
+export default function page({ Component, pageProps }: AppProps) {
   return (
-    <>
-      <Home />
-    </>
+    <AuthProvider>
+     <Login/>
+    </AuthProvider>
   );
-};
-
-export default Page;
+}

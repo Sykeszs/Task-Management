@@ -2,6 +2,7 @@
 import { Timestamp, collection, onSnapshot, doc, deleteDoc, updateDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { db } from "@/app/firebaseConfig";
+import Navbar from "../components/navbar/navbar";
 
 interface Task {
   id: string;
@@ -55,7 +56,9 @@ export default function RecentlyDeletedPage() {
   };
 
   return (
-    <div className="min-h-screen p-4 bg-gray-100">
+    <div  className="flex-1 bg-gray-50  overflow-y-autoauto">
+      <Navbar/>
+    <div className="p-8 bg-gray-100 min-h-screen overflow-auto lg:ml-64">
       <h1 className="text-2xl font-bold text-center text-red-600 mb-6">
         Recently Deleted Tasks
       </h1>
@@ -92,6 +95,7 @@ export default function RecentlyDeletedPage() {
           )}
         </ul>
       </div>
+    </div>
     </div>
   );
 }

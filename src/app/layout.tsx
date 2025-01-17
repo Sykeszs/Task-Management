@@ -1,4 +1,4 @@
-import Navbar from "./components/navbar/navbar";
+import { AuthProvider } from "./context/AuthContext";
 import "./globals.css";
 import { Inter } from "next/font/google";
 
@@ -15,16 +15,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
+    <AuthProvider>
     <html lang="en">
       <body className={`${inter.className} flex min-h-screen`}>
-
-        <Navbar />
-
-        {/* Main Content Area */}
-        <main className="flex-1 p-6 bg-gray-50 lg:ml-64 overflow-y-autoauto">
+        <main className="flex-1">
           {children}
         </main>
       </body>
     </html>
+    </AuthProvider>
   );
 }

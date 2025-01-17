@@ -1,10 +1,31 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../../firebaseConfig";
+
 import Link from "next/link";
 import { XMarkIcon, Bars3Icon } from "@heroicons/react/24/outline";
+import { signOut } from "firebase/auth";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        router.replace("/login"); // Redirect to login if not logged in
+      }
+    });
+
+    return () => unsubscribe();
+  }, [router]);
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    router.push("/login");
+  };
 
   return (
     <div className="flex fixed">
@@ -31,6 +52,12 @@ const Navbar = () => {
         <Link href="/settings" className="text-white hover:text-gray-300">
           Settings
         </Link>
+        <button
+          onClick={handleLogout}
+          className="mt-4 bg-red-500 text-white p-2 rounded"
+        >
+          Logout
+        </button>
       </nav>
 
       {/* Hamburger menu for mobile */}
@@ -64,6 +91,12 @@ const Navbar = () => {
             <Link href="/settings" className="text-white hover:text-gray-300">
               Settings
             </Link>
+            <button
+              onClick={handleLogout}
+              className="mt-4 bg-red-500 text-white p-2 rounded"
+            >
+              Logout
+            </button>
           </div>
         )}
       </nav>

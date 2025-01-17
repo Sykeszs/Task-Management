@@ -1,3 +1,4 @@
+import Navbar from "../components/navbar/navbar";
 import Calendar from "./components/calendar";
 import NotesPage from "./components/notes";
 import ProgressPage from "./components/progress";
@@ -6,7 +7,9 @@ import TaskManagementPage from "./components/taskmanagement";
 
 const Home = () => {
   return (
-    <div className="p-8 bg-gray-100 min-h-screen overflow-auto">
+    <div  className="flex-1 bg-gray-50  overflow-y-autoauto">
+      <Navbar/>
+    <div className="p-8 bg-gray-100 min-h-screen overflow-auto lg:ml-64">
       <h1 className="text-2xl font-bold text-center text-gray-800 mb-8">Home Page</h1>
 
       {/* Task Management Page at the top */}
@@ -27,6 +30,7 @@ const Home = () => {
           <NotesPage />
         </div>
       </div>
+    </div>
     </div>
   );
 };
