@@ -1,9 +1,9 @@
 // _app.tsx
-import { AuthProvider } from "./context/AuthContext";
-import type { AppProps } from "next/app";
 import Login from "./login/page";
+import { AuthProvider } from "./context/AuthContext";
 
-export default function page({ Component, pageProps }: AppProps) {
+
+export default function page() {
   return (
     <AuthProvider>
      <Login/>
