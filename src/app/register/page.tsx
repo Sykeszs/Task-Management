@@ -140,9 +140,11 @@ export default function Register() {
           return prev - 1;
         });
       }, 1000);
-    } catch (_) {
+    } catch (error) {
+      console.error("Resend OTP Error:", error);
       setError("Failed to resend OTP. Please try again.");
     }
+    
   };
 
   return (
