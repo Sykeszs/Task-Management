@@ -2,7 +2,8 @@
 import { useEffect, useState } from "react";
 import { db } from "@/app/firebaseConfig";
 import { collection, addDoc, doc, onSnapshot, updateDoc, query, where, serverTimestamp, Timestamp } from "firebase/firestore";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getAuth, onAuthStateChanged, User } from "firebase/auth";
+
 
 interface Task {
   id: string;
@@ -18,7 +19,7 @@ export default function TaskManagementPage() {
   const [taskName, setTaskName] = useState("");
   const [isEditing, setIsEditing] = useState<string | null>(null);
   const [editedTaskName, setEditedTaskName] = useState("");
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   const auth = getAuth();
 
@@ -28,7 +29,7 @@ export default function TaskManagementPage() {
       setUser(user);
     });
     return () => unsubscribe();
-  }, []);
+  }, [auth]);
 
   // Fetch tasks for the current user (only show active tasks where deleted is false)
   useEffect(() => {
