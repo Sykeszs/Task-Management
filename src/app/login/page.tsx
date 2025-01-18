@@ -4,18 +4,19 @@ import { useState, useEffect } from "react";
 import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebaseConfig";
 import { useRouter } from "next/navigation";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    // Automatically redirect if user is already logged in
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        router.replace("/home"); // Redirect to home page after login
+        router.replace("/home");
       }
     });
 
@@ -27,11 +28,9 @@ export default function Login() {
     setError("");
     try {
       await signInWithEmailAndPassword(auth, email, password);
-
-      // After successful login, navigate to the home page
       router.replace("/home");
-
     } catch (error: unknown) {
+      setPassword("");
       if (error instanceof Error && "code" in error && typeof error.code === "string") {
         if (
           error.code === "auth/user-not-found" || 
@@ -44,7 +43,7 @@ export default function Login() {
         }
       }
       console.error("Login Error:", error);
-   }
+    }
   };
 
   return (
@@ -59,24 +58,43 @@ export default function Login() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
-        <input
-          type="password"
-          placeholder="Password"
-          className="w-full p-2 mb-4 border rounded"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <div className="relative w-full mb-4">
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Password"
+            className="w-full p-2 border rounded pr-10"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-2 top-2 text-gray-500"
+          >
+            {showPassword ? <FaEye className="w-5 h-5" /> : <FaEyeSlash className="w-5 h-5" /> }
+          </button>
+        </div>
         <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded mb-2">
           Login
         </button>
         <p className="text-center text-sm">
-          Don`&apos;`t have an account? 
+          Don&apos;t have an account? 
           <button 
             type="button" 
             onClick={() => router.push("/register")} 
             className="text-blue-500 hover:underline ml-1"
           >
             Register
+          </button>
+        </p>
+        <p className="text-center text-sm">
+          Forgot your password? 
+          <button 
+            type="button" 
+            onClick={() => router.push("/forgot")} 
+            className="text-blue-500 hover:underline ml-1"
+          >
+            Reset Password
           </button>
         </p>
       </form>

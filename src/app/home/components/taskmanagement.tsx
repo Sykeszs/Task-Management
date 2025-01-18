@@ -1,15 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { db } from "@/app/firebaseConfig";
-import {
-  collection,
-  addDoc,
-  doc,
-  onSnapshot,
-  updateDoc,
-  serverTimestamp,
-  Timestamp,
-} from "firebase/firestore";
+import { collection, addDoc, doc, onSnapshot, updateDoc, query, where, serverTimestamp, Timestamp } from "firebase/firestore";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 interface Task {
   id: string;
@@ -17,6 +10,7 @@ interface Task {
   createdAt: Timestamp;
   updatedAt: Timestamp;
   done: boolean;
+  deleted: boolean; // Add the 'deleted' field
 }
 
 export default function TaskManagementPage() {
@@ -24,41 +18,61 @@ export default function TaskManagementPage() {
   const [taskName, setTaskName] = useState("");
   const [isEditing, setIsEditing] = useState<string | null>(null);
   const [editedTaskName, setEditedTaskName] = useState("");
+  const [user, setUser] = useState<any>(null);
 
+  const auth = getAuth();
+
+  // Track the logged-in user
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, "tasks"), (snapshot) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Fetch tasks for the current user (only show active tasks where deleted is false)
+  useEffect(() => {
+    if (!user) return;
+
+    const q = query(collection(db, "tasks"), where("userId", "==", user.uid), where("deleted", "==", false));
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
       const taskData = snapshot.docs.map((doc) => ({
         id: doc.id,
         name: doc.data().name,
         createdAt: doc.data().createdAt as Timestamp,
         updatedAt: doc.data().updatedAt as Timestamp,
         done: doc.data().done,
-        deleted: doc.data().deleted,
+        deleted: doc.data().deleted, // Ensure the 'deleted' field is included
       }));
-      setTasks(taskData.filter((task) => !task.done && !task.deleted));
+      setTasks(taskData.filter((task) => !task.done)); // Show only incomplete tasks
     });
-    return () => unsubscribe();
-  }, []);
 
+    return () => unsubscribe();
+  }, [user]);
+
+  // Add a new task
   const addTask = async () => {
-    if (taskName.trim()) {
+    if (taskName.trim() && user) {
       await addDoc(collection(db, "tasks"), {
         name: taskName,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
         done: false,
-        deleted: false,
+        deleted: false, // New tasks are not deleted
+        userId: user.uid, // Save user ID
       });
       setTaskName("");
     }
   };
 
+  // Soft delete task (mark it as deleted without removing it)
   const deleteTask = async (taskId: string) => {
     const taskDoc = doc(db, "tasks", taskId);
     await updateDoc(taskDoc, { deleted: true, updatedAt: serverTimestamp() });
   };
-  
 
+  // Mark task as done (completed)
   const markAsDone = async (taskId: string, done: boolean) => {
     const taskRef = doc(db, "tasks", taskId);
     await updateDoc(taskRef, {
@@ -67,6 +81,7 @@ export default function TaskManagementPage() {
     });
   };
 
+  // Edit task name
   const editTask = async (taskId: string) => {
     const taskRef = doc(db, "tasks", taskId);
     await updateDoc(taskRef, {
@@ -79,9 +94,11 @@ export default function TaskManagementPage() {
 
   return (
     <div className="min-h-screen p-4 bg-gray-100">
-      <h1 className="text-2xl font-bold text-center text-green-600 mb-6">
-        Task Management
-      </h1>
+      <h1 className="text-2xl font-bold text-center text-green-600 mb-6">Task Management</h1>
+
+      {/* Show user email */}
+      {user && <p className="text-center text-gray-600 mb-4">Welcome, {user.email}</p>}
+
       <div className="max-w-md mx-auto">
         <div className="flex mb-4">
           <input
@@ -110,9 +127,7 @@ export default function TaskManagementPage() {
                     className="p-2 border rounded"
                   />
                 ) : (
-                  <span className={task.done ? "line-through text-gray-500" : ""}>
-                    {task.name}
-                  </span>
+                  <span className={task.done ? "line-through text-gray-500" : ""}>{task.name}</span>
                 )}
                 <div className="text-sm text-gray-500">
                   <span>Created: {task.createdAt?.toDate().toLocaleString()}</span>
@@ -156,9 +171,7 @@ export default function TaskManagementPage() {
               </div>
             </li>
           ))}
-          {tasks.length === 0 && (
-            <li className="p-4 text-center text-gray-500">No tasks available</li>
-          )}
+          {tasks.length === 0 && <li className="p-4 text-center text-gray-500">No tasks available</li>}
         </ul>
       </div>
     </div>
