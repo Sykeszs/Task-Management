@@ -28,22 +28,22 @@ const Account = () => {
       if (currentUser) {
         const userRef = doc(db, 'users', currentUser.uid);
         const userSnap = await getDoc(userRef);
-
+  
         if (userSnap.exists()) {
           const userData = userSnap.data() as { name: string; email: string; dob: string; gender?: string; avatar?: string; bio: string };
-          const gender = userData.gender === 'Male' || userData.gender === 'Female' ? userData.gender : 'Male';
-
-          const avatar = userData.avatar || getDefaultAvatar(gender);
+          const defaultGender = userData.gender === 'Male' || userData.gender === 'Female' ? userData.gender : 'Male';
+          const avatar = userData.avatar || getDefaultAvatar(defaultGender);
+          
           if (!userData.avatar) {
             await setDoc(userRef, { avatar }, { merge: true });
           }
-
-          setUser({ ...userData, gender, avatar });
-          setFormData({ ...userData, gender, avatar });
+  
+          setUser({ ...userData, gender: defaultGender, avatar });
+          setFormData({ ...userData, gender: defaultGender, avatar });
         } else {
           const defaultGender = 'Male';
           const avatar = getDefaultAvatar(defaultGender);
-
+  
           const newUser = {
             name: currentUser.displayName || '',
             email: currentUser.email || '',
@@ -53,7 +53,7 @@ const Account = () => {
             bio: '',
           };
           await setDoc(userRef, newUser);
-
+  
           setUser(newUser);
           setFormData(newUser);
         }
@@ -63,6 +63,7 @@ const Account = () => {
     });
     return () => unsubscribe();
   }, [router]);
+  
 
   const handleEdit = () => setIsEditing(true);
 
