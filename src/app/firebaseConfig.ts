@@ -2,6 +2,8 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+import { GoogleAuthProvider } from "firebase/auth/web-extension";
+
 
 const firebaseConfig = {
   apiKey: "AIzaSyAalLtqMULjp_6gwVAxJjEahAO2u0QExSc",  // Fixed typo
@@ -13,6 +15,8 @@ const firebaseConfig = {
   measurementId: "G-0WKY3YSKSR"
 };
 
-const app = initializeApp(firebaseConfig);
+export const app = initializeApp(firebaseConfig);
+export const firestore = getFirestore(app);
 export const auth = getAuth(app);
+export const googleProvider = new GoogleAuthProvider();
 export const db = getFirestore(app);
