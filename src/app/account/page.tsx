@@ -15,7 +15,10 @@ const maleAvatars = Array.from({ length: 6 }, (_, i) => `/avatars/a${i + 1}.png`
 const femaleAvatars = Array.from({ length: 6 }, (_, i) => `/avatars/a${i + 7}.png`);
 
 // Update the function to always return a0 for both genders
-const getDefaultAvatar = (gender: string) => '/avatars/a0.png';
+const getDefaultAvatar = (gender: string) => {
+  console.log("Selected gender for avatar:", gender);
+  return '/avatars/a0.png';
+};
 
 const Account = () => {
   const router = useRouter();
