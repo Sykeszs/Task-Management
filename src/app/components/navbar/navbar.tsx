@@ -37,17 +37,11 @@ const Navbar = () => {
         <Link href="/home" className="text-white hover:text-gray-300">
           Home
         </Link>
-        <Link href="/about" className="text-white hover:text-gray-300">
-          Team Task
-        </Link>
         <Link href="/history" className="text-white hover:text-gray-300">
           History
         </Link>
         <Link href="/trash" className="text-white hover:text-gray-300">
           Trash
-        </Link>
-        <Link href="/inbox" className="text-white hover:text-gray-300">
-          Inbox
         </Link>
         <Link href="/settings" className="text-white hover:text-gray-300">
           Settings
@@ -79,17 +73,11 @@ const Navbar = () => {
             <Link href="/home" className="text-white hover:text-gray-300">
               Home
             </Link>
-            <Link href="/about" className="text-white hover:text-gray-300">
-              Team Task
-            </Link>
             <Link href="/history" className="text-white hover:text-gray-300">
               History
             </Link>
             <Link href="/trash" className="text-white hover:text-gray-300">
               Trash
-            </Link>
-            <Link href="/inbox" className="text-white hover:text-gray-300">
-              Inbox
             </Link>
             <Link href="/settings" className="text-white hover:text-gray-300">
               Settings
