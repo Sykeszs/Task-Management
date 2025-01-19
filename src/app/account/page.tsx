@@ -6,6 +6,7 @@ import { getAuth, onAuthStateChanged, signOut, updateProfile } from 'firebase/au
 import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
 import { app } from '../firebaseConfig';
 import Navbar from '../components/navbar/navbar';
+import Image from 'next/image';
 
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -32,7 +33,7 @@ const Account = () => {
           const userData = userSnap.data() as { name: string; email: string; dob: string; gender?: string; avatar?: string; bio: string };
           const gender = userData.gender === 'Male' || userData.gender === 'Female' ? userData.gender : 'Male';
 
-          let avatar = userData.avatar || getDefaultAvatar(gender);
+          const avatar = userData.avatar || getDefaultAvatar(gender);
           if (!userData.avatar) {
             await setDoc(userRef, { avatar }, { merge: true });
           }
@@ -105,16 +106,22 @@ const Account = () => {
           <h2 className="text-2xl font-semibold mb-4">Account Details</h2>
           {user && (
             <>
-              <img src={user.avatar} alt="Avatar" className="w-24 h-24 mx-auto rounded-full mb-4 border" />
+              <Image
+                src={user.avatar}
+                alt="Avatar"
+                width={96}
+                height={96}
+                className="mx-auto rounded-full mb-4 border"
+              />
               {isEditing ? (
                 <div className="space-y-4">
-                <textarea
+                  <textarea
                     name="bio"
                     value={formData.bio}
                     onChange={handleChange}
                     placeholder="Describe yourself..."
                     className="w-full p-2 border rounded-lg mt-4"
-                />
+                  />
                   <input
                     type="text"
                     name="name"
@@ -151,11 +158,13 @@ const Account = () => {
                     <p className="text-sm font-semibold">Select an Avatar:</p>
                     <div className="flex flex-wrap justify-center gap-2 mt-2">
                       {(formData.gender === 'Male' ? maleAvatars : femaleAvatars).map((avatar, index) => (
-                        <img
+                        <Image
                           key={index}
                           src={avatar}
                           alt="Avatar"
-                          className={`w-16 h-16 rounded-full cursor-pointer border-2 ${formData.avatar === avatar ? 'border-blue-500' : 'border-transparent'}`}
+                          width={64}
+                          height={64}
+                          className={`rounded-full cursor-pointer border-2 ${formData.avatar === avatar ? 'border-blue-500' : 'border-transparent'}`}
                           onClick={() => handleAvatarSelect(avatar)}
                         />
                       ))}

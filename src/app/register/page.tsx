@@ -4,10 +4,9 @@ import { useState } from "react";
 import { 
   createUserWithEmailAndPassword, 
   updateProfile,
-  fetchSignInMethodsForEmail,
-  getAuth
+  fetchSignInMethodsForEmail
 } from "firebase/auth";
-import { collection, doc, setDoc, getDoc } from "firebase/firestore";
+import { setDoc, getDoc, doc } from "firebase/firestore";
 import { auth, db } from "../firebaseConfig";
 import { useRouter } from "next/navigation";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
@@ -21,8 +20,6 @@ export default function Register() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [verificationStep, setVerificationStep] = useState(false);
-  const [resendTimer, setResendTimer] = useState(60);
-  const [resendDisabled, setResendDisabled] = useState(true);
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showReenterPassword, setShowReenterPassword] = useState(false);
@@ -62,14 +59,14 @@ export default function Register() {
         return;
       }
 
-       // 🔹 Store gender and dob in Firestore
-    await setDoc(doc(db, "users", user.uid), {
-      username,
-      email,
-      gender,  // Store the gender
-      dob,     // Store the date of birth
-      createdAt: new Date(),
-    });
+      // 🔹 Store gender and dob in Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        username,
+        email,
+        gender,  // Store the gender
+        dob,     // Store the date of birth
+        createdAt: new Date(),
+      });
 
       // 🔹 Generate OTP
       const otpCode = generateOTP();
@@ -90,19 +87,6 @@ export default function Register() {
 
       setSuccess("OTP sent to your email. Please check your inbox.");
       setVerificationStep(true);
-
-      // 🔹 Start 60s resend timer
-      setResendDisabled(true);
-      setResendTimer(60);
-      const timer = setInterval(() => {
-        setResendTimer((prev) => {
-          if (prev === 1) {
-            clearInterval(timer);
-            setResendDisabled(false);
-          }
-          return prev - 1;
-        });
-      }, 1000);
     } catch (error: unknown) {
       if (error instanceof Error) {
         console.error("Registration Error:", error);
@@ -158,30 +142,26 @@ export default function Register() {
             onChange={(e) => setEmail(e.target.value)}
             required
           />
-          {/* 🔹 Date of Birth Field */}
-        <input
-          type="date"
-          placeholder="Date of Birth"
-          className="w-full p-2 mb-2 border rounded"
-          value={dob}
-          onChange={(e) => setDob(e.target.value)}
-          required
-        />
+          <input
+            type="date"
+            placeholder="Date of Birth"
+            className="w-full p-2 mb-2 border rounded"
+            value={dob}
+            onChange={(e) => setDob(e.target.value)}
+            required
+          />
+          <select
+            className="w-full p-2 mb-2 border rounded"
+            value={gender}
+            onChange={(e) => setGender(e.target.value)}
+            required
+          >
+            <option value="">Select Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
 
-        {/* 🔹 Gender Field */}
-        <select
-          className="w-full p-2 mb-2 border rounded"
-          value={gender}
-          onChange={(e) => setGender(e.target.value)}
-          required
-        >
-          <option value="">Select Gender</option>
-          <option value="Male">Male</option>
-          <option value="Female">Female</option>
-          <option value="Other">Other</option>
-        </select>
-
-          {/* Password Field */}
           <div className="relative w-full mb-4">
             <input
               type={showPassword ? "text" : "password"}
@@ -200,7 +180,6 @@ export default function Register() {
             </button>
           </div>
 
-          {/* Re-enter Password Field */}
           <div className="relative w-full mb-4">
             <input
               type={showReenterPassword ? "text" : "password"}
