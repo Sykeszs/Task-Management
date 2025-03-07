@@ -25,15 +25,6 @@ const Account = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', dob: '', gender: 'Male', avatar: '', bio: '' });
 
-  // Rendering male and female avatars
-  const maleAvatars = Array.from({ length: 6 }, (_, i) => `/avatars/a${i + 1}.png`);
-  const femaleAvatars = Array.from({ length: 6 }, (_, i) => `/avatars/a${i + 7}.png`);
-
-  const getDefaultAvatar = (gender: string) => {
-    console.log("Selected gender for avatar:", gender);
-    return '/avatars/a0.png';
-  };
-
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
