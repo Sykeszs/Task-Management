@@ -25,6 +25,15 @@ const Account = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', dob: '', gender: 'Male', avatar: '', bio: '' });
 
+  // Rendering male and female avatars
+  const maleAvatars = Array.from({ length: 6 }, (_, i) => `/avatars/a${i + 1}.png`);
+  const femaleAvatars = Array.from({ length: 6 }, (_, i) => `/avatars/a${i + 7}.png`);
+
+  const getDefaultAvatar = (gender: string) => {
+    console.log("Selected gender for avatar:", gender);
+    return '/avatars/a0.png';
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
@@ -117,6 +126,27 @@ const Account = () => {
               />
               {isEditing ? (
                 <div className="space-y-4">
+                  <div className="avatar-selection flex justify-around mb-4">
+                    {formData.gender === 'Male'
+                      ? maleAvatars.map((avatar, index) => (
+                          <img
+                            key={index}
+                            src={avatar}
+                            alt={`Male Avatar ${index + 1}`}
+                            onClick={() => handleAvatarSelect(avatar)}
+                            className={`w-16 h-16 rounded-full cursor-pointer ${formData.avatar === avatar ? 'border-4 border-customColor4' : ''}`}
+                          />
+                        ))
+                      : femaleAvatars.map((avatar, index) => (
+                          <img
+                            key={index}
+                            src={avatar}
+                            alt={`Female Avatar ${index + 1}`}
+                            onClick={() => handleAvatarSelect(avatar)}
+                            className={`w-16 h-16 rounded-full cursor-pointer ${formData.avatar === avatar ? 'border-4 border-customColor4' : ''}`}
+                          />
+                        ))}
+                  </div>
                   <textarea
                     name="bio"
                     value={formData.bio}
